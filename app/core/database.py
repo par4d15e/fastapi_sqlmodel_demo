@@ -1,8 +1,8 @@
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlmodel import SQLModel
 
+from app.core.base_model import Base
 from app.core.config import settings
 
 # 创建数据库引擎和会话工厂
@@ -23,4 +23,4 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 # 请在生产环境中使用 Alembic 进行数据库迁移
 async def create_db_and_tables():
     async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.create_all)
+        await conn.run_sync(Base.metadata.create_all)

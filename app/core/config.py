@@ -6,12 +6,18 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    # 应用配置 (支持 PostgreSQL 和 SQLite, 含连接池设置)
+    # 配置来源
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+    )
 
-    app_name: str = "How much to Eat"
+    # 应用信息
+    app_name: str = "PAWCARE"
     debug: bool = False
 
-    # 数据库类型
+    # 数据库类型 (支持 PostgreSQL 和 SQLite, 含连接池设置)
     db_type: Literal["postgres", "sqlite"] = "sqlite"
 
     # PostgreSQL 配置（敏感信息请通过 .env 或环境变量注入，不要在代码中硬编码）
@@ -40,6 +46,11 @@ class Settings(BaseSettings):
 
     # SQLite 配置
     sqlite_db_path: str = "./data/db.sqlite3"
+
+    # JWT 配置（重要：请在 .env 或环境变量中设置真实的密钥，生产环境不能使用空值）
+    jwt_secret: str = "example_jwt_secret"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
 
     # Redis 配置
     redis_host: str = "localhost"
@@ -85,17 +96,6 @@ class Settings(BaseSettings):
     @property
     def cache_redis_url(self) -> str:
         return f"redis://{self.redis_host}:{self.redis_port}/{self.cache_redis_db}"
-
-    # JWT 配置（重要：请在 .env 或环境变量中设置真实的密钥，生产环境不能使用空值）
-    jwt_secret: str = "example_jwt_secret"
-    jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-    )
 
 
 settings = Settings()

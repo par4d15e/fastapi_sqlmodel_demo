@@ -12,7 +12,7 @@ from app.profiles.service import ProfileService
 router = APIRouter(prefix="/profiles", tags=["profiles"])
 
 
-# 依赖注入：为当前请求提供 ProfileService
+# 依赖注入：为路由请求提供 ProfileService
 async def get_profile_service(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> ProfileService:
@@ -29,7 +29,6 @@ async def create_profile(
     return new_profile
 
 
-# 查询指定名称的 profile，不存在抛出 404
 @router.get("/{profile_name}", response_model=ProfileResponse)
 async def get_profile(
     profile_name: Annotated[str, Path(..., description="宠物名称")],
@@ -43,7 +42,7 @@ async def get_profile(
 
 @router.patch("/{profile_id}", response_model=ProfileResponse)
 async def update_profile(
-    profile_id: int,
+    profile_id: Annotated[int, Path(..., description="宠物ID")],
     profile: ProfileUpdate,
     service: Annotated[ProfileService, Depends(get_profile_service)],
 ):
@@ -52,7 +51,8 @@ async def update_profile(
 
 @router.delete("/{profile_id}", status_code=204)
 async def delete_profile(
-    profile_id: int, service: ProfileService = Depends(get_profile_service)
+    profile_id: Annotated[int, Path(..., description="宠物ID")],
+    service: Annotated[ProfileService, Depends(get_profile_service)],
 ):
     await service.delete_profile(profile_id)
     return None

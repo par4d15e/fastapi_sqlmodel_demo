@@ -58,9 +58,9 @@ class ProfileRepository:
         limit = min(limit, 500)
         offset = max(offset, 0)
         paginated_query = query.offset(offset).limit(limit)
-        items = list(await self.session.scalars(paginated_query))
+        profiles = list(await self.session.scalars(paginated_query))
 
-        return items
+        return profiles
 
     async def create(self, profile_data: Mapping[str, Any]) -> Profile:
         profile = Profile(**profile_data)
@@ -74,9 +74,11 @@ class ProfileRepository:
         return profile
 
     async def update(
-        self, profile_data: Mapping[str, Any], profile_id: int
+        self,
+        profile_id: int,
+        profile_data: Mapping[str, Any],
     ) -> Profile | None:
-        profile = await self.session.get(Profile, profile_id)
+        profile = await self.get_by_id(profile_id)
         if not profile:
             return None
 
@@ -87,7 +89,7 @@ class ProfileRepository:
         return profile
 
     async def delete(self, profile_id: int) -> bool:
-        profile = await self.session.get(Profile, profile_id)
+        profile = await self.get_by_id(profile_id)
         if not profile:
             return False
 

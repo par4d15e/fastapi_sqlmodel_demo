@@ -11,6 +11,7 @@ class ProfileBase(BaseModel):
     gender: Annotated[str, Field(..., max_length=20, description="性别")]
     variety: Annotated[str, Field(..., max_length=100, description="品种")]
     birthday: Annotated[date | None, Field(None, description="生日")]
+    meals_per_day: Annotated[int, Field(2, ge=1, description="每日餐数")]
 
 
 class ProfileCreate(ProfileBase):

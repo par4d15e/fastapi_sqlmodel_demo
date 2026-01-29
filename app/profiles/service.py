@@ -15,12 +15,14 @@ class ProfileService:
         profile = await self.repository.get_by_name(profile_name)
         if not profile:
             raise NotFoundException("Profile not found")
+
         return ProfileResponse.model_validate(profile)
 
     async def get_profile_by_id(self, profile_id: int) -> ProfileResponse:
         profile = await self.repository.get_by_id(profile_id)
         if not profile:
             raise NotFoundException("Profile not found")
+
         return ProfileResponse.model_validate(profile)
 
     async def list_profiles(
@@ -40,25 +42,30 @@ class ProfileService:
             limit=limit,
             offset=offset,
         )
+
         return [ProfileResponse.model_validate(profile) for profile in profiles]
 
     async def create_profile(self, profile_data: ProfileCreate) -> ProfileResponse:
         data = profile_data.model_dump()
         try:
             profile = await self.repository.create(data)
+
             return ProfileResponse.model_validate(profile)
         except IntegrityError as e:
             raise AlreadyExistsException("Profile with this name already exists") from e
 
     async def update_profile(
-        self, profile_id: int, profile_data: ProfileUpdate
+        self,
+        profile_id: int,
+        profile_data: ProfileUpdate,
     ) -> ProfileResponse:
         try:
             update_data = profile_data.model_dump(exclude_unset=True, exclude_none=True)
-            uptaded = await self.repository.update(update_data, profile_id)
-            if not uptaded:
+            updated = await self.repository.update(profile_id, update_data)
+            if not updated:
                 raise NotFoundException("Profile not found")
-            return ProfileResponse.model_validate(uptaded)
+
+            return ProfileResponse.model_validate(updated)
         except IntegrityError as e:
             raise AlreadyExistsException("Profile with this name already exists") from e
 
@@ -66,4 +73,5 @@ class ProfileService:
         deleted = await self.repository.delete(profile_id)
         if not deleted:
             raise NotFoundException("Profile not found")
+
         return True

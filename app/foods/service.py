@@ -32,7 +32,7 @@ class FoodService:
         limit: int = 10,
         offset: int = 0,
     ) -> list[FoodResponse]:
-        """查询所有宠物档案"""
+        """查询所有食物"""
         foods = await self.repository.get_all(
             search=search,
             order_by=order_by,
@@ -50,10 +50,14 @@ class FoodService:
         except IntegrityError as e:
             raise AlreadyExistsException("Food with this name already exists") from e
 
-    async def update_food(self, food_id: int, food_data: FoodUpdate) -> FoodResponse:
+    async def update_food(
+        self,
+        food_id: int,
+        food_data: FoodUpdate,
+    ) -> FoodResponse:
         try:
             update_data = food_data.model_dump(exclude_unset=True, exclude_none=True)
-            updated = await self.repository.update(update_data, food_id)
+            updated = await self.repository.update(food_id, update_data)
             if not updated:
                 raise NotFoundException("Food not found")
             return FoodResponse.model_validate(updated)

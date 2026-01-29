@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
@@ -12,7 +12,7 @@ from app.foods.service import FoodService
 router = APIRouter(prefix="/foods", tags=["foods"])
 
 
-# 依赖注入：为当前请求提供 FoodService
+# 依赖注入：为路由请求提供 FoodService
 async def get_food_service(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> FoodService:
@@ -29,10 +29,9 @@ async def create_food(
     return new_food
 
 
-# 查询指定名称的 food，不存在抛出 404
 @router.get("/{food_name}", response_model=FoodResponse)
 async def read_food(
-    food_name: str,
+    food_name: Annotated[str, Path(..., description="食物名称")],
     service: Annotated[FoodService, Depends(get_food_service)],
 ):
     food = await service.get_food_by_name(food_name)
@@ -43,7 +42,7 @@ async def read_food(
 
 @router.patch("/{food_id}", response_model=FoodResponse)
 async def update_food(
-    food_id: int,
+    food_id: Annotated[int, Path(..., description="食物ID")],
     food: FoodUpdate,
     service: Annotated[FoodService, Depends(get_food_service)],
 ):
@@ -52,7 +51,8 @@ async def update_food(
 
 @router.delete("/{food_id}", status_code=204)
 async def delete_food(
-    food_id: int, service: Annotated[FoodService, Depends(get_food_service)]
+    food_id: Annotated[int, Path(..., description="食物ID")],
+    service: Annotated[FoodService, Depends(get_food_service)],
 ):
     await service.delete_food(food_id)
     return None

@@ -61,9 +61,9 @@ class FoodRepository:
         limit = min(limit, 500)
         offset = max(offset, 0)
         paginated_query = query.offset(offset).limit(limit)
-        items = list(await self.session.scalars(paginated_query))
+        foods = list(await self.session.scalars(paginated_query))
 
-        return items
+        return foods
 
     async def create(self, food_data: Mapping[str, Any]) -> Food:
         food = Food(**food_data)
@@ -76,8 +76,12 @@ class FoodRepository:
         await self.session.refresh(food)
         return food
 
-    async def update(self, food_data: Mapping[str, Any], food_id: int) -> Food | None:
-        food = await self.session.get(Food, food_id)
+    async def update(
+        self,
+        food_id: int,
+        food_data: Mapping[str, Any],
+    ) -> Food | None:
+        food = await self.get_by_id(food_id)
         if not food:
             return None
 
